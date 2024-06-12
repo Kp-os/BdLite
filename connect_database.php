@@ -41,27 +41,38 @@
 <?php
 session_start();
 require_once 'MySQLDatabase.php';
-require_once 'Person.php';
+require_once 'FirebirdDatabase.php';
+require_once 'PostgreSQLDatabase.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $servername = $_POST['servername'];
     $username = $_POST['username'];
     $password = $_POST['password'];
     $dbname = $_POST['dbname'];
+    $dbtype = $_POST['dbtype'];
     $_SESSION['servername'] = $servername;
     $_SESSION['username'] = $username;
     $_SESSION['password'] = $password;
     $_SESSION['dbname'] = $dbname;
+    $_SESSION['dbtype'] = $dbtype;
 
     try {
-        $db = new MySQLDatabase($_SESSION['servername'], $_SESSION['username'], $_SESSION['password'], $_SESSION['dbname']);
+        switch ($dbtype) {
+            case "MySQL":
+                $db = new MySQLDatabase($_SESSION['servername'], $_SESSION['username'], $_SESSION['password'], $_SESSION['dbname']);
 
-        echo "Connected successfully!";
+                require_once 'display_table.php';
+                require_once 'MySQLforms.php';
 
-        require_once 'display_table.php';
-        require_once 'insert_form.php';
-        require_once 'update_form.php';
-        require_once 'delete_form.php';
+                echo "Connected successfully!";
+                break;
+            case "Firebird":
+                $db = new FirebirdDatabase($_SESSION['servername'], $_SESSION['username'], $_SESSION['password'], $_SESSION['dbname']);
+                break;
+            case "PostgreSQL":
+                $db = new PostgreSQLDatabase($_SESSION['servername'], $_SESSION['username'], $_SESSION['password'], $_SESSION['dbname']);
+                break;
+        }
 
     } catch (Exception $e) {
         echo "Error: " . $e->getMessage();
